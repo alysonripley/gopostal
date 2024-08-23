@@ -1,6 +1,3 @@
-// Package postal provides Go bindings for the libpostal C library,
-// offering functionality for parsing, expanding, and generating
-// near-dupe hashes for postal addresses.
 package postal
 
 /*
@@ -26,8 +23,6 @@ func init() {
     }
 }
 
-// NormalizeOptions represents the options allowed for name normalization for NearDupeNameHashes input.
-// Corresponds to the C libpostal_normalize_options_t struct.
 type NormalizeOptions struct {
     Languages []string
     AddressComponents uint16
@@ -50,8 +45,6 @@ type NormalizeOptions struct {
     RomanNumerals bool
 }
 
-// NearDupeHashOptions represents the options allowed for near-dupe hashing.
-// It corresponds to the C libpostal_near_dupe_hash_options_t struct.
 type NearDupeHashOptions struct {
     WithName bool
     WithAddress bool
@@ -68,32 +61,9 @@ type NearDupeHashOptions struct {
     AddressOnlyKeys bool
 }
 
-// Fetch the default Libpostal C options for Near Dupe Hash and Normalization
 var cDefaultOptions = C.libpostal_get_default_options()
-
-// #define DEFAULT_NEAR_DUPE_GEOHASH_PRECISION 6
-// static libpostal_near_dupe_hash_options_t LIBPOSTAL_NEAR_DUPE_HASH_DEFAULT_OPTIONS = {
-//     .with_name = true,
-//     .with_address = true,
-//     .with_unit = false,
-//     .with_city_or_equivalent = true,
-//     .with_small_containing_boundaries = true,
-//     .with_postal_code = true,
-//     .with_latlon = false,
-//     .latitude = 0.0,
-//     .longitude = 0.0,
-//     .geohash_precision = DEFAULT_NEAR_DUPE_GEOHASH_PRECISION,
-//     .name_and_address_keys = true,
-//     .name_only_keys = false,
-//     .address_only_keys = false
-// };
 var cHashDefaultOptions = C.libpostal_get_near_dupe_hash_default_options()
 
-// GetDefaultNormalizeOptions returns the default options for name normalization.
-// Initializes a NormalizeOptions struct with the default values from libpostal.
-//
-// Returns:
-//   - NormalizeOptions: A struct containing the default normalization options.
 func GetDefaultNormalizeOptions() NormalizeOptions {
 	return NormalizeOptions{
 		Languages: nil,
@@ -118,11 +88,6 @@ func GetDefaultNormalizeOptions() NormalizeOptions {
 	}
 }
 
-// GetDefaultNearDupeHashOptions returns the default options for near-dupe hashing.
-// Initializes a NearDupeHashOptions struct with the default values from libpostal.
-//
-// Returns:
-//   - NearDupeHashOptions: A struct containing the default near-dupe hash options.
 func GetDefaultNearDupeHashOptions() NearDupeHashOptions {
     return NearDupeHashOptions{
         WithName: bool(cHashDefaultOptions.with_name),
@@ -144,16 +109,6 @@ func GetDefaultNearDupeHashOptions() NearDupeHashOptions {
 var libpostalDefaultOptions = GetDefaultNormalizeOptions()
 var libpostalDefaultHashOptions = GetDefaultNearDupeHashOptions()
 
-// NearDupeNameOptions generates near-dupe hashes for a given name
-// using the specified normalization options.
-//
-// Parameters:
-//   - name: A string representing the name to generate hashes for.
-//   - options: NormalizeOptions specifying the normalization configuration.
-//
-// Returns:
-//   - []string: A slice of strings containing the generated near-dupe hashes.
-//     Returns nil if the input name is not a valid UTF-8 string.
 func NearDupeNameOptions(name string, options NormalizeOptions) []string {
     if !utf8.ValidString(name) {
         return nil
@@ -214,30 +169,10 @@ func NearDupeNameOptions(name string, options NormalizeOptions) []string {
 	return cStringArrayToStringSlice(cHashes, cNumHashes)
 }
 
-// NearDupeNames generates near-dupe hashes for a given name using default options.
-//
-// Parameters:
-//   - name: A string representing the name to generate hashes for.
-//
-// Returns:
-//   - []string: A slice of strings containing the generated near-dupe hashes.
-//     Returns nil if the input name is not a valid UTF-8 string.
 func NearDupeNames(name string) ([]string) {
 	return NearDupeNameOptions(name, libpostalDefaultOptions)
 }
 
-// NearDupeHashesWithOptions generates near-dupe hashes for the given components
-// with custom options and optional languages.
-//
-// Parameters:
-//   - labels: A slice of strings representing the labels of address components.
-//   - values: A slice of strings representing the values of address components.
-//   - options: NearDupeHashOptions specifying the hashing configuration.
-//   - languages: A slice of strings representing 2-letter ISO language codes to consider.
-//
-// Returns:
-//   - []string: A slice of strings containing the generated near-dupe hashes.
-//     Returns nil if the input slices have different lengths or are empty.
 func NearDupeOptions(labels []string, values []string, options NearDupeHashOptions, languages []string) []string {
     if len(labels) != len(values) {
         return nil
@@ -310,58 +245,18 @@ func NearDupeOptions(labels []string, values []string, options NearDupeHashOptio
     return cStringArrayToStringSlice(cHashes, cNumHashes)
 }
 
-// NearDupe generates near-dupe hashes for the given components using default options.
-//
-// Parameters:
-//   - labels: A slice of strings representing the labels of address components.
-//   - values: A slice of strings representing the values of address components.
-//   - options: NearDupeHashOptions specifying the hashing configuration.
-//
-// Returns:
-//   - []string: A slice of strings containing the generated near-dupe hashes.
-//     Returns nil if the input slices have different lengths or are empty.
 func NearDupe(labels []string, values []string, options NearDupeHashOptions) []string {
     return NearDupeOptions(labels, values, options, nil)
 }
 
-// NearDupe generates near-dupe hashes for the given components using default options.
-//
-// Parameters:
-//   - labels: A slice of strings representing the labels of address components.
-//   - values: A slice of strings representing the values of address components.
-//
-// Returns:
-//   - []string: A slice of strings containing the generated near-dupe hashes.
-//     Returns nil if the input slices have different lengths or are empty.
 func NearDupeDefaultOptions(labels []string, values []string) []string {
     return NearDupeOptions(labels, values, libpostalDefaultHashOptions, nil)
 }
 
-// NearDupeLanguages generates near-dupe hashes for the given components
-// with specified languages using default options.
-//
-// Parameters:
-//   - labels: A slice of strings representing the labels of address components.
-//   - values: A slice of strings representing the values of address components.
-//   - options: NearDupeHashOptions specifying the hashing configuration.
-//   - languages: A slice of strings representing language codes to consider.
-//
-// Returns:
-//   - []string: A slice of strings containing the generated near-dupe hashes.
-//     Returns nil if the input slices have different lengths or are empty.
 func NearDupeLanguages(labels []string, values []string, options NearDupeHashOptions, languages []string) []string {
     return NearDupeOptions(labels, values, options, languages)
 }
 
-// PlaceLanguages returns the languages for the given address components.
-//
-// Parameters:
-//   - labels: A slice of strings representing the labels of address components.
-//   - values: A slice of strings representing the values of address components.
-//
-// Returns:
-//   - []string: A slice of strings containing the detected languages.
-//     Returns nil if the input slices have different lengths or are empty.
 func PlaceLanguages(labels []string, values []string) []string {
     if len(labels) != len(values) {
         return nil
@@ -398,22 +293,6 @@ func PlaceLanguages(labels []string, values []string) []string {
 	return cStringArrayToStringSlice(cLanguages, cNumLanguages)
 }
 
-// cStringArrayToStringSlice converts a C array of strings to a Go slice of strings.
-//
-// This function is an internal helper used to bridge between C and Go data structures.
-// It takes a pointer to a C array of strings and its size, then creates a new Go
-// slice and populates it with the strings from the C array.
-//
-// Parameters:
-//   - cArray: A pointer to a C array of strings (type **C.char).
-//   - arraySize: The size of the C array (type C.size_t).
-//
-// Returns:
-//   - []string: A Go slice containing the strings from the C array.
-//
-// Note: This function assumes that the C array is properly null-terminated and
-// that the arraySize accurately reflects the number of strings in the array.
-// Callers are responsible for freeing the original C array after using this function.
 func cStringArrayToStringSlice(cArray **C.char, arraySize C.size_t) []string {
     slice := make([]string, int(arraySize))
     cArrayPtr := (*[1<<30](*C.char))(unsafe.Pointer(cArray))
@@ -425,7 +304,6 @@ func cStringArrayToStringSlice(cArray **C.char, arraySize C.size_t) []string {
     return slice
 }
 
-// Frees resources allocated by libpostal
 func NearDupeTeardown() {
     mu.Lock()
     defer mu.Unlock()
