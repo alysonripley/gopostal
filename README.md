@@ -41,6 +41,41 @@ func main() {
 }
 ```
 
+To get unique address hashes, useful for deduplication:
+
+```go
+package main
+
+import (
+    "fmt"
+    neardupe "github.com/openvenues/gopostal/neardupe"
+)
+
+func main() {
+    address_labels := []string{"house_number", "road", "unit", "city", "state", "postcode"}
+    address_values := []string{"123", "Main St", "#3", "Anytown", "CA", "12345"}
+
+    options := neardupe.NearDupeHashOptions{}
+    options.WithName = false
+    options.WithAddress = true
+    options.WithUnit = true
+    options.WithCityOrEquivalent = true
+    options.WithSmallContainingBoundaries = false
+    options.WithPostalCode = true
+    options.WithLatlon = true
+    options.Latitude = 43.916847
+    options.Longitude = -69.977149
+    options.GeohashPrecision = 6
+    options.NameAndAddressKeys = false
+    options.NameOnlyKeys = true
+    options.AddressOnlyKeys = true
+
+    neardupehash := neardupe.NearDupe(address_labels, address_values, options)
+    fmt.Println(neardupehash)
+
+}
+```
+
 ## Prerequisites
 
 Before using the Go bindings, you must install the libpostal C library. Make sure you have the following prerequisites:
@@ -85,6 +120,11 @@ go get github.com/openvenues/gopostal/expand
 For parsing:
 ```
 go get github.com/openvenues/gopostal/parser
+```
+
+For near dupe hashing:
+```
+go get github.com/openvenues/gopostal/neardupe
 ```
 
 ## Tests
