@@ -1,3 +1,3 @@
-module github.com/alyripley/gopostal
+module github.com/alysonripley/gopostal
 
 go 1.22.5

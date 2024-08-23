@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	neardupe "github.com/alyripley/gopostal/neardupe"
+	neardupe "github.com/alysonripley/gopostal/neardupe"
 )
 
 func main() {
